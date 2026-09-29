@@ -150,16 +150,17 @@ spec:
     #   - no CASB is between the workload cluster's egress and the mgmt-plane hostname
     #
     # The manifest is idempotent (a small Job runs the patch once at cluster bring-up).
-    - name: coredns-phonehome
-      type: manifest
-      layer: addon
-      manifests:
-        - name: coredns-phonehome-patcher
-          content: |
-            # <PASTE_coredns-phonehome-manifest.yaml>
-            # Substitute:
-            #   {{.spectro.var.MGMT_ELB_IP}}      → mgmt-plane ELB IP (see Palette UI → System / About)
-            #   {{.spectro.var.MGMT_ROOTDOMAIN}}  → mgmt-plane rootDomain (e.g. palette.mycompany.com)
+    # This isn't needed when using enterprise DNS but left to share ways you can reference small jobs or custom scripts in a profile
+    # - name: coredns-phonehome
+    #   type: manifest
+    #   layer: addon
+    #   manifests:
+    #     - name: coredns-phonehome-patcher
+    #       content: |
+    #         # <PASTE_coredns-phonehome-manifest.yaml>
+    #         # Substitute:
+    #         #   {{.spectro.var.MGMT_ELB_IP}}      → mgmt-plane ELB IP (see Palette UI → System / About)
+    #         #   {{.spectro.var.MGMT_ROOTDOMAIN}}  → mgmt-plane rootDomain (e.g. palette.mycompany.com)
 
     # ------------------------------------------------------------------
     # 7. cert-manager — REQUIRED for Domino (its operator + fleetcommand-agent
