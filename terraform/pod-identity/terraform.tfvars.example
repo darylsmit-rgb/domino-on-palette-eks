@@ -1,0 +1,44 @@
+# Copy to terraform.tfvars and fill with real values before `terraform apply`.
+#
+# Roles listed here must ALREADY EXIST in IAM with a trust policy that allows
+# pods.eks.amazonaws.com to assume them (see POD-IDENTITY.md for the trust JSON).
+# This module only creates the SA→role BINDINGS on EKS — not the roles themselves.
+#
+# Standard Domino on Palette-EKS shape covers:
+#   - EBS + EFS CSI controllers (kube-system) — needed for storage provisioning
+#   - Domino platform-operator (domino-operator) — reconciles the Domino CR
+#   - Flyte control-plane + data-plane (domino-platform) — workflow engine
+#
+# Trim entries you don't use (no EFS → drop efs-csi). Add entries for anything
+# else that needs AWS access (e.g., extra CDN uploaders, custom controllers).
+
+cluster_name = "REPLACE-ME"                    # e.g., "domino-oai-il5"
+region       = "us-gov-west-1"                 # or your region
+
+associations = {
+  ebs-csi = {
+    namespace       = "kube-system"
+    service_account = "ebs-csi-controller-sa"
+    role_arn        = "arn:aws-us-gov:iam::REPLACE-ACCT:role/domino-ebs-csi"
+  }
+  efs-csi = {
+    namespace       = "kube-system"
+    service_account = "efs-csi-controller-sa"
+    role_arn        = "arn:aws-us-gov:iam::REPLACE-ACCT:role/domino-efs-csi"
+  }
+  platform-operator = {
+    namespace       = "domino-operator"
+    service_account = "platform-operator"
+    role_arn        = "arn:aws-us-gov:iam::REPLACE-ACCT:role/domino-cp-operator"
+  }
+  flyte-controlplane = {
+    namespace       = "domino-platform"
+    service_account = "flyte-controlplane"
+    role_arn        = "arn:aws-us-gov:iam::REPLACE-ACCT:role/domino-cp-flyte-cp"
+  }
+  flyte-dataplane = {
+    namespace       = "domino-platform"
+    service_account = "flyte-dataplane"
+    role_arn        = "arn:aws-us-gov:iam::REPLACE-ACCT:role/domino-cp-flyte-dp"
+  }
+}

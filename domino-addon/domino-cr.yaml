@@ -1,0 +1,136 @@
+# Domino custom resource — applied as a Palette 'Add Manifest' add-on layer (AFTER the operator layer).
+# The in-cluster platform-operator reconciles this -> runs the fleetcommand-agent -> installs Domino.
+# UPGRADE = bump spec.agent.version (catalog tag) + spec.version here and re-reconcile.
+# Registry creds SCRUBBED: for SAME-ACCOUNT ECR the node role's ECR-read covers image pulls (no secret
+# needed). For a private/cross-account registry, create a pull secret + reference it instead.
+apiVersion: operator.domino.ai/v1beta1
+kind: Domino
+metadata:
+  name: domino
+  namespace: domino-operator
+spec:
+  agent:
+    spec:
+      containerSecurityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: false
+      imagePullSecrets:
+      - name: domino-quay-repos
+      nodeSelector:
+        dominodatalab.com/node-pool: platform
+      repository: <ECR_REGISTRY>/<ECR_PREFIX>/domino/fleetcommand-agent
+      resources:
+        limits:
+          cpu: "4"
+          memory: 1500Mi
+        requests:
+          cpu: "4"
+          memory: 1500Mi
+      retryLimit: 1
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seLinuxOptions:
+          type: spc_t
+      serviceAccountName: platform-operator
+      version: 6.2.2.catalog-34a6626
+  catalog: {}
+  clusterId: domino-cp
+  config: |
+    autoscaler:
+      auto_discovery:
+        cluster_name: domino-trysomething
+        tags: []
+      aws:
+        region: us-gov-west-1
+      cloud_provider: aws
+    blob_storage:
+      backups:
+        s3:
+          bucket: domino-cp-backups-<AWS_ACCOUNT_ID>-us-gov-west-1
+          region: us-gov-west-1
+          sse_kms_key_id: b3eb9181-219d-4c92-96da-eebe78039efc
+      logs:
+        s3:
+          bucket: domino-cp-logs-<AWS_ACCOUNT_ID>-us-gov-west-1
+          region: us-gov-west-1
+          sse_kms_key_id: b3eb9181-219d-4c92-96da-eebe78039efc
+      projects:
+        s3:
+          bucket: domino-cp-projects-<AWS_ACCOUNT_ID>-us-gov-west-1
+          region: us-gov-west-1
+          sse_kms_key_id: b3eb9181-219d-4c92-96da-eebe78039efc
+    email_notifications:
+      authentication:
+        password: "__SET_VIA_PULL_SECRET_OR_NODE_ROLE__"
+        username: ""
+      enable_ssl: true
+      enabled: false
+      from_address: CHANGE_ME@customer.org
+      port: 465
+      server: _CHANGE_ME_
+    external_deployments:
+      cluster_config:
+        eks:
+          aws_account_id: "<AWS_ACCOUNT_ID>"
+          operator_role_arn: arn:aws-us-gov:iam::<AWS_ACCOUNT_ID>:role/domino-cp-operator
+          operator_service_account_name: domino-operator
+      enabled: true
+    external_docker_registry: <ECR_REGISTRY>/<ECR_PREFIX>
+    flyte:
+      cluster_config:
+        eks:
+          aws_account_id: "<AWS_ACCOUNT_ID>"
+          controlplane_role_arn: arn:aws-us-gov:iam::<AWS_ACCOUNT_ID>:role/domino-cp-flyte-cp
+          dataplane_role_arn: arn:aws-us-gov:iam::<AWS_ACCOUNT_ID>:role/domino-cp-flyte-dp
+      data_storage:
+        s3:
+          bucket: domino-cp-flyte-data-<AWS_ACCOUNT_ID>-us-gov-west-1
+          region: us-gov-west-1
+          sse_kms_key_id: b3eb9181-219d-4c92-96da-eebe78039efc
+      metadata_storage:
+        s3:
+          bucket: domino-cp-flyte-meta-<AWS_ACCOUNT_ID>-us-gov-west-1
+          region: us-gov-west-1
+          sse_kms_key_id: b3eb9181-219d-4c92-96da-eebe78039efc
+    gpu:
+      enabled: false
+    helm:
+      image_registries:
+        - password: "__SET_VIA_PULL_SECRET_OR_NODE_ROLE__"
+          server: <ECR_REGISTRY>/<ECR_PREFIX>
+          username: AWS
+    hostname: domino.trysomething.local
+    metrics_server:
+      install: false
+    monitoring:
+      prometheus_metrics: true
+    name: domino-cp
+    schema: "1.16"
+    storage_classes:
+      block:
+        access_modes:
+          - ReadWriteOnce
+        base_path: ""
+        create: true
+        name: dominodisk
+        type: ebs
+      shared:
+        access_modes:
+          - ReadWriteMany
+        create: true
+        efs:
+          access_point_id: fsap-0f191fe4e060c7cf5
+          filesystem_id: fs-03f35a3c07a31e33f
+          region: us-gov-west-1
+        name: dominoshared
+        type: efs
+        volume_capacity: 5Ti
+    telemetry:
+      mixpanel: {}
+    version: 6.2.2
+  interval: 6h0m0s
+  version: 6.2.2

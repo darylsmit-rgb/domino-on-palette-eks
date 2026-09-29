@@ -27,9 +27,9 @@ require reading every doc.
    deep-dive: where Palette's ownership stops and Domino's begins, storage
    class boundaries (EBS vs EFS ownership split, `dominodisk` vs
    `dominoshared`), and why we set `storage_classes.block.create=false`.
-4. **[PROFILE-VARIABLES.md](PROFILE-VARIABLES.md)** — reference of every
+5. **[PROFILE-VARIABLES.md](PROFILE-VARIABLES.md)** — reference of every
    variable exposed by the profile, what it does, and reasonable defaults.
-5. **[OFFLINE-IMAGES-DDLCTL.md](OFFLINE-IMAGES-DDLCTL.md)** — airgap
+6. **[OFFLINE-IMAGES-DDLCTL.md](OFFLINE-IMAGES-DDLCTL.md)** — airgap
    image mirroring (Domino's 207 images → your ECR) and `ddlctl bootstrap`
    quirks. Skip if you're on a connected environment.
 
