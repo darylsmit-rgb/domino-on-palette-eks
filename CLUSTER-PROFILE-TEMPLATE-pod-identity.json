@@ -1,0 +1,80 @@
+{
+  "apiVersion": "profile.palette.spectrocloud.com/v1",
+  "kind": "ClusterProfile",
+  "metadata": {
+    "name": "domino-host-eks-pod-identity",
+    "labels": {
+      "scope": "project",
+      "workload": "domino"
+    }
+  },
+  "spec": {
+    "version": "1.0.0",
+    "cloudType": "eks",
+    "type": "cluster",
+    "packs": [
+      {
+        "name": "amazon-linux-eks",
+        "type": "spectro",
+        "layer": "os",
+        "tag": "1.0.0",
+        "registry": "<PACK_REGISTRY>",
+        "values": ""
+      },
+      {
+        "name": "kubernetes-eks",
+        "type": "spectro",
+        "layer": "k8s",
+        "tag": "<K8S_VERSION>.x",
+        "registry": "<PACK_REGISTRY>",
+        "values": ""
+      },
+      {
+        "name": "cni-calico",
+        "type": "spectro",
+        "layer": "cni",
+        "tag": "3.27.x",
+        "registry": "<PACK_REGISTRY>",
+        "values": ""
+      },
+      {
+        "name": "csi-aws-ebs",
+        "type": "spectro",
+        "layer": "csi",
+        "tag": "1.30.x",
+        "registry": "<PACK_REGISTRY>",
+        "values": "# <PASTE_csi-aws-ebs-values-pod-identity.yaml.tmpl>\n# Substitute the <PLACEHOLDER> tokens documented at the top of that file:\n#   <AWS_ACCOUNT_ID>, <ECR_PREFIX>, ebs_csi_irsa_role_arn\n# See csi-aws-ebs-values.spectrovars.yaml for the Palette-UI variable-form\n# version if you'd rather parameterize via Palette variables.\n"
+      },
+      {
+        "name": "efs-storage",
+        "type": "manifest",
+        "layer": "addon",
+        "manifests": [
+          {
+            "name": "dominoshared-efs",
+            "content": "# <PASTE_storage-layer-efs-csi-manifest.yaml>\n# Substitute:\n#   {{.spectro.var.STORAGE_EFS_ID}}  → your EFS file system ID (fs-XXXXXXXX)\n# The manifest creates the EFS CSI driver, its ServiceAccount, IRSA annotation,\n# and the `dominoshared` StorageClass. See DOMINO-ADDON-LAYERS.md for detail.\n"
+          }
+        ]
+      },
+      {
+        "name": "coredns-phonehome",
+        "type": "manifest",
+        "layer": "addon",
+        "manifests": [
+          {
+            "name": "coredns-phonehome-patcher",
+            "content": "# <PASTE_coredns-phonehome-manifest.yaml>\n# Substitute:\n#   {{.spectro.var.MGMT_ELB_IP}}      → mgmt-plane ELB IP (see Palette UI → System / About)\n#   {{.spectro.var.MGMT_ROOTDOMAIN}}  → mgmt-plane rootDomain (e.g. palette.mycompany.com)\n"
+          }
+        ]
+      },
+      {
+        "name": "cert-manager",
+        "type": "spectro",
+        "layer": "addon",
+        "tag": "1.14.x",
+        "registry": "<PACK_REGISTRY>",
+        "values": ""
+      }
+    ]
+  }
+}

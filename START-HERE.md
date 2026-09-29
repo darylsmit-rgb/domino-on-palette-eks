@@ -36,7 +36,24 @@ require reading every doc.
 ## Cluster profile template (start here for the profile itself)
 
 [CLUSTER-PROFILE-TEMPLATE.yaml](CLUSTER-PROFILE-TEMPLATE.yaml) is the
-ready-to-import cluster-profile shell. Edit four things (`<K8S_VERSION>`,
+ready-to-import cluster-profile shell (**IRSA flavor** — the pack values
+carry `eks.amazonaws.com/role-arn` annotations and `regionalStsEndpoints:
+true`).
+
+For clusters that use **EKS Pod Identity** instead of IRSA, use
+[CLUSTER-PROFILE-TEMPLATE-pod-identity.yaml](CLUSTER-PROFILE-TEMPLATE-pod-identity.yaml)
+and the matching
+[csi-aws-ebs-values-pod-identity.yaml.tmpl](csi-aws-ebs-values-pod-identity.yaml.tmpl) /
+[csi-aws-efs-values-pod-identity.yaml.tmpl](csi-aws-efs-values-pod-identity.yaml.tmpl).
+That flavor strips the IRSA annotation and STS endpoint config; the SA→role
+bindings come from [terraform/pod-identity/](terraform/pod-identity/) or
+[scripts/pod-identity-associations.sh](scripts/pod-identity-associations.sh)
+instead. See [POD-IDENTITY.md](POD-IDENTITY.md) for the trust JSON.
+
+Both templates have JSON siblings (`.json` — same content, different
+serialization) for tooling that prefers JSON.
+
+The original YAML shell: Edit four things (`<K8S_VERSION>`,
 `<PACK_REGISTRY>`, plus paste the values from the four pack-values files
 below), and import via Palette UI → Cluster Profiles → Add Cluster Profile
 → Import from File. See PALETTE-UI-RUNBOOK.md for the click path.
