@@ -1,0 +1,15 @@
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Local var files — real values live here; use terraform.tfvars.example as the template
+terraform.tfvars
+*.auto.tfvars
+!terraform.tfvars.example
+
+# Plan files
+*.tfplan

@@ -144,3 +144,28 @@ spec:
             # Substitute:
             #   {{.spectro.var.MGMT_ELB_IP}}      → mgmt-plane ELB IP (see Palette UI → System / About)
             #   {{.spectro.var.MGMT_ROOTDOMAIN}}  → mgmt-plane rootDomain (e.g. palette.mycompany.com)
+
+    # ------------------------------------------------------------------
+    # 7. cert-manager — REQUIRED for Domino (its operator + fleetcommand-agent
+    #    both expect cert-manager on the workload cluster)
+    # ------------------------------------------------------------------
+    # WHY this layer exists here: Domino's fleetcommand-agent + platform-operator
+    # both create Certificate CRs against a ClusterIssuer during install. Without
+    # cert-manager on the workload cluster, those Certificates never bind → Domino
+    # webhook Secrets never issue → the whole app install stalls.
+    #
+    # The Palette mgmt-plane runs its own cert-manager for its OWN pods; that does
+    # NOT install cert-manager on workload clusters. Every Domino-hosting workload
+    # cluster needs its own cert-manager, and that comes from this profile layer.
+    #
+    # Field report (Navy OAI, Sep 2026): customer had to install cert-manager
+    # manually because this layer was missing from an earlier template.
+    #
+    # In Domino's CR values: set `certificate_management.install=false` so Domino
+    # doesn't try to install a SECOND cert-manager alongside this one (collision).
+    - name: cert-manager
+      type: spectro
+      layer: addon
+      tag: "1.14.x"                 # 1.14.x / 1.15.x / 1.16.x all work; check your pack registry
+      registry: <PACK_REGISTRY>
+      values: ""                     # pack defaults are fine; adjust only if you need custom DNS-01

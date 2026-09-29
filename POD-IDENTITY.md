@@ -155,6 +155,29 @@ aws eks create-pod-identity-association \
 
 (Same pattern for `efs-csi-controller-sa` in `kube-system` if using EFS.)
 
+## Automating all associations at once
+
+Two ready-to-use options that replace running `create-pod-identity-association`
+by hand for each SA. Both cover the five Domino-on-EKS associations (EBS CSI,
+EFS CSI, platform-operator, flyte-controlplane, flyte-dataplane):
+
+- **Terraform:** [`terraform/pod-identity/`](./terraform/pod-identity/) —
+  declarative module + example tfvars. Fits customer environments where
+  cluster provisioning is already IaC. `terraform apply` after the roles
+  exist.
+- **Bash script:** [`scripts/pod-identity-associations.sh`](./scripts/pod-identity-associations.sh) —
+  imperative alternative. Reads env vars (`CLUSTER_NAME`, `REGION`,
+  `PARTITION`, `ACCT`), skips already-existing associations, `SKIP_*=1`
+  env vars turn off individual entries.
+
+The IAM roles themselves still have to exist beforehand — this
+automation only creates the SA→role bindings on EKS, not the roles.
+
+**Field report (Navy OAI, Sep 2026):** customer manually ran
+`create-pod-identity-association` for the CSI SAs because the pack values
+carry IRSA-style annotations that Pod Identity ignores. Using this
+module OR script removes the manual step.
+
 ## Common failures
 
 - **`eks-pod-identity-agent` addon in `DEGRADED` state, but pods look Ready

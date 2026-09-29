@@ -91,7 +91,7 @@ Two EFS options, pick one:
 - Non-FIPS images (`us-docker.pkg.dev/palette-images`) → needs the **"allow non-FIPS packages"** toggle + the 4 images mirrored (imageswap).
 
 **Domino config (fed to the CR generator)** — Palette owns these, so Domino must NOT re-install them (each was an ownership collision or a pre-flight failure we hit):
-- `certificate_management.install=false` (Palette provides cert-manager)
+- `certificate_management.install=false` — cert-manager runs on the workload cluster via the `cert-manager` addon layer in the profile (see CLUSTER-PROFILE-TEMPLATE.yaml layer #7). Setting this to `false` stops Domino from installing a SECOND cert-manager alongside it. If your profile is missing the `cert-manager` layer, Domino stalls — add the layer OR install cert-manager separately with `helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --set installCRDs=true`.
 - `metrics_server.install=false` (Palette provides it — do NOT set true; the `RoleBinding metrics-server-auth-reader cannot be imported` collision)
 - `storage_classes.block.create=false`, `storage_classes.shared.create=false` + `name=dominoshared` (pack owns both CSIs)
 - `release_overrides.cluster-autoscaler.installed=false` (Palette owns node scaling)
